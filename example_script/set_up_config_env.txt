@@ -1,0 +1,8 @@
+# Go to location where files are installed
+cd C:\Users\tdmaarseveen\Desktop\projects\ELISA-APP
+
+# Create conda env
+conda env create -f environment.yml -n bpexi
+
+# Activate conda env
+conda activate bpexi

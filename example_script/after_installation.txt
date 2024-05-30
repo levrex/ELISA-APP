@@ -1,0 +1,16 @@
+conda activate bpexi
+
+press enter
+
+python manage.py makemigrations
+
+press enter
+
+python manage.py migrate
+
+press enter
+
+doubleclick on .bat file on the J-drive ELISA-app 2.0 
+then a webbrowser will open 
+
+press enter
