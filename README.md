@@ -13,14 +13,7 @@ H:
 cd .\ projects\ELISA-APP
 ```
 
-
-Next you can download all required packages within the terminal:
-
-```batch
-python -m pip install -r requirements.txt
-```
-
-Alternatively, you can create a neat conda environment where you install all packages:
+You can then create a neat conda environment where you install all packages:
 ```batch
 conda env create -f environment.yml -n bpexi
 ```
@@ -28,8 +21,18 @@ After installing you can then activate the environment as follows:
 ```batch
 conda activate bpexi
 ```
+
+Alternatively (if you do not have conda) you can install the required packages with python in a bash terminal: 
+```batch
+python -m pip install -r requirements.txt
+```
 ## App startup
-To start the app, run the command python ELISA_app/manage.py runserver in Anaconda prompt (or the terminal app of your liking).
+To start the app, run the script ELISA_app/manage.py in Anaconda prompt (or the terminal app of your liking):
+
+```batch
+python ELISA_app/manage.py runserver
+```
+
 A link should be visible as output: “Starting development server at `http://127.0.0.1:8000/`”
 To access the app, open your browser and go to `http://127.0.0.1:8000/`.
 
