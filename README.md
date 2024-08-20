@@ -36,11 +36,11 @@ python ELISA_app/manage.py runserver
 A link should be visible as output: “Starting development server at `http://127.0.0.1:8000/`”
 To access the app, open your browser and go to `http://127.0.0.1:8000/`.
 
-Alternatively, you can make a batch script that does this for you (Look in the example folder for inspiration). Keep in mind that the pipeline is built for Python 3.10.
+Alternatively, you can make a batch script that does this for you (Look in the example folder for inspiration). Keep in mind that the pipeline is built for Python 3.10 (though it also works with newer versions like Python 3.12).
 
 
 ## Contact
-Please [create an issue](https://github.com/Mikaela39/BPEXI/issues/new/choose) if you encounter any errors or have any questions after reading the documentation.
+Please [create an issue](https://github.com/levrex/ELISA-APP/issues/new/choose) if you encounter any errors or have any questions after reading the documentation.
 
 
 ## Credits

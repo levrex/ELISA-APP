@@ -145,7 +145,7 @@ def Input_data(request):
                 data = Plates.objects.values()
                 temp = []
                 for i in data:
-                    name = i['id'].lower()
+                    name = i['name'].lower() # i['id'].lower()
                     temp.append(name)
                 return render(request, 'Input_data.html', {
                     'check': 'correct', 'files': temp,
@@ -725,7 +725,7 @@ def Visualize_data(request):
         nested = []
         temp = []
         for i in data:
-            name = i['id'].lower()
+            name = i['name'].lower() #i['id'].lower()
             lines = i['data'].split('=')[:-1]
             number1 = lines[106].replace(',', '.')
             number2 = lines[107].replace(',', '.')
@@ -1608,7 +1608,7 @@ def report_writeout():
     #Save end results
     with open(join(target, "end_results.txt"), "w") as f:
         f.write(f"Plate name\t"
-                f"Plate number\t"
+                #f"Plate number\t"
                 f"Well number\t"
                 f"Sample ID\t"
                 f"Positive (1) or Negative (0)\t"
