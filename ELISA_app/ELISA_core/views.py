@@ -776,7 +776,7 @@ def Visualize_data(request):
         return render(request, 'Visualize_data.html', {
             'dictionary': dictionary,
             'cut_off_type': cut_off_type,
-            'linear_part' : 'Points selected per plate the linear part: %s' % (str(linear_part))
+            'linear_part' : 'Points selected per plate for the linear part: %s' % (str(linear_part))
             
     })
     except: #todo should specify this
