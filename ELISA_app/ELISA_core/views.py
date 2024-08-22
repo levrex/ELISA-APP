@@ -46,6 +46,7 @@ def reset_data():
     global cut_data; cut_data = []
     global outlier_value; outlier_value = 0.0
     global cut_off_value; cut_off_value = 0.0
+    global dilution_factor; dilution_factor = 0.0
     global end_result; end_result = {}
     global lower; lower = 0.0
     global upper; upper = 0.0
@@ -914,6 +915,7 @@ def Cut_off(request):
         global check_cut_off
         global outlier_value
         global cut_off_value
+        global dilution_factor
         global elisa_type
         cut_dict = {}
         if cut_off_type == '2':
@@ -947,13 +949,15 @@ def Cut_off(request):
                     'std2': std2,
                     'check': check_cut_off,
                     'outlier_value': outlier_value,
-                    'cut_off_value': cut_off_value,
+                    'cut_off_value': cut_off_value  * dilution_factor, 
                 })
             elif request.POST.get('cut_off_submit'):
                 input3 = request.POST.get('input3')
                 input4 = request.POST.get('input4')
+                input5 = request.POST.get('input5')
                 cut_off_value = (float(input3) * mean2) + (float(input4) * std2)
                 cut_off_value = round(cut_off_value, 3) #TODO Flow for formula and cut-off
+                dilution_factor = float(input5)
                 return render(request, 'Cut_off.html', {
                     'mean': mean,
                     'std': std,
@@ -961,7 +965,7 @@ def Cut_off(request):
                     'std2': std2,
                     'check': check_cut_off,
                     'outlier_value': outlier_value,
-                    'cut_off_value': cut_off_value,
+                    'cut_off_value': cut_off_value * dilution_factor # Cut off times dilution factor
                 })
         elif cut_data == []:
             if elisa_type == '1':
@@ -1017,6 +1021,7 @@ def Cut_off(request):
                 'check': check_cut_off,
                 'outlier_value': outlier_value,
                 'cut_off_value': cut_off_value,
+                'dilution_factor': dilution_factor,
             })
         return render(request, 'Cut_off.html', {
             'mean': mean,
@@ -1026,6 +1031,7 @@ def Cut_off(request):
             'check': check_cut_off,
             'outlier_value': outlier_value,
             'cut_off_value': cut_off_value,
+            'dilution_factor': dilution_factor,
         })
     except:
         return render(request, 'Error.html', {
