@@ -770,9 +770,13 @@ def Visualize_data(request):
             nested = []
         if totaal != []:
             create_graph(dictionary)
+        linear_part = '; '.join(['%s (top=%s; bot=%s)' % (key, points_dictionary[key][1], points_dictionary[key][0]) for key in points_dictionary.keys()])
+        print("linear part", '; '.join(['%s (top=%s; bot=%s)' % (key, points_dictionary[key][1], points_dictionary[key][0]) for key in points_dictionary.keys()])) 
         return render(request, 'Visualize_data.html', {
             'dictionary': dictionary,
             'cut_off_type': cut_off_type,
+            'linear_part' : 'Points selected per plate the linear part: %s' % (str(linear_part))
+            
     })
     except: #todo should specify this
          return render(request, 'Error.html', {
@@ -961,38 +965,44 @@ def Cut_off(request):
                 })
         elif cut_data == []:
             if elisa_type == '1':
-                print(elisa_type, len(totaal) == len(dictionary), len(totaal), len(dictionary))
-                print('value:', totaal[2][2][1], 'value2:', totaal[2][2][2], totaal[2][2][3])
+                # Get index of HD plate
+                
+                index_HD = next((i for i, sublist in enumerate(totaal) if str(sublist[0][0]).lower() == HD), None)
+                #print(index_HD)
+                #print(str(totaal[int(index_HD)][7][11][:2]).lower() in ("hd", "rl"))
+                #print(totaal[2][2][7][:2].lower())
+                
                 for i, j in dictionary.items():
                     if HD == i:
                         for values in range(len(j)):
                             count_the_mod = 0
                             for value in range(len(j[values])):
                                 if type(j[values][value][0]) != str:
-                                    if int(row_standard) == 0:
-                                        if value != int(column_standard[0]):
-                                            if value != int(column_standard[1]):
-                                                if count_the_mod < 5:
-                                                    cut_data.append(j[values][value][0])
-                                                    count_the_mod += 1
-                                    elif int(row_standard) != values:
-                                        mod_length = len(j[values])/2
-                                        if value <= mod_length:
-                                            cut_data.append(j[values][value][0])
+                                    if str(totaal[int(index_HD)][values][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                        if int(row_standard) == 0:
+                                            if value != int(column_standard[0]):
+                                                if value != int(column_standard[1]):
+                                                    if count_the_mod < 5:
+                                                        cut_data.append(j[values][value][0])
+                                                        count_the_mod += 1
+                                        elif int(row_standard) != values:
+                                            mod_length = len(j[values])/2
+                                            if value <= mod_length:
+                                                cut_data.append(j[values][value][0])
             elif elisa_type == '2':
-                print(elisa_type, len(totaal) == len(dictionary), len(totaal), len(dictionary))
-                print('value:', totaal[2][2][0])
+                index_HD = next((i for i, sublist in enumerate(totaal) if str(sublist[0][0]).lower() == HD), None)
                 for i, j in dictionary.items():
                     if HD == i:
                         for values in range(len(j)):
                             for value in range(len(j[values])):
                                 if type(j[values][value][0]) != str:
-                                    if int(row_standard) == 0:
-                                        if value != int(column_standard[0]):
-                                            if value != int(column_standard[1]):
-                                                cut_data.append(j[values][value][0])
-                                    elif int(row_standard) != values:
-                                        cut_data.append(j[values][value][0])
+                                    if str(totaal[int(index_HD)][values][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                        if int(row_standard) == 0:
+                                            if value != int(column_standard[0]):
+                                                if value != int(column_standard[1]):
+                                                    cut_data.append(j[values][value][0])
+                                        elif int(row_standard) != values:
+                                            cut_data.append(j[values][value][0])
             cut_dict["OD"] = cut_data
             mean = round(statistics.mean(cut_data), 3)
             std = round(statistics.stdev(cut_data), 3)
@@ -1097,6 +1107,7 @@ def Intermediate_result(request):
             mean_ST_dictionary[key].reverse()
             top = mean_ST_dictionary[key][int(points_dictionary[key][1]) - 1]
             bot = mean_ST_dictionary[key][int(points_dictionary[key][0]) - 1]
+            
             if len(seprate_dilution) != 0:
                 for sep in seprate_dilution[0]:
                     if sep == key[key.index("plate"):key.index("plate") + 7] or sep == key[key.index("plate"):key.index("plate") + 8] or sep == key[key.index("plate"):key.index("plate") + 9]:
@@ -1114,6 +1125,7 @@ def Intermediate_result(request):
                     if dilution[d][0][0].lower() == key[key.index("plate"):key.index("plate") + 7] or dilution[d][0][0].lower() == key[key.index("plate"):key.index("plate") + 8] or dilution[d][0][0].lower() == key[key.index("plate"):key.index("plate") + 9]:
                         string_top = formula2(top, *params_dictionary[key]) * int(dilution[d][3][3])
                         string_bot = formula2(bot, *params_dictionary[key]) * int(dilution[d][3][3])
+            
             count_mod = 0
             count_mod2 = 0
             row_check += 1
@@ -1155,6 +1167,8 @@ def Intermediate_result(request):
                                 temp2.append(value[:3])
                 count_mod += 1
             mean_ST_dictionary[key].reverse()
+        
+        
         sorted_temp1 = sorted(temp1, key=itemgetter(1))
         sorted_temp2 = sorted(temp2, key=itemgetter(1))
         sorted_temp3 = sorted(temp3, key=itemgetter(1))

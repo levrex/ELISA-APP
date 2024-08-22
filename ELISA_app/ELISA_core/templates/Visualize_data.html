@@ -7,7 +7,9 @@
 {% load static %}
 <link rel="stylesheet" type="text/css"
           href="{% static 'css/Visualize_data.css' %}">
-
+<p class="spacing">
+        {{linear_part}} <br>
+    </p>
 <form method="POST">
     {% csrf_token %}
     {% for key, value_list in dictionary.items %}
