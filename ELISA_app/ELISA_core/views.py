@@ -23,7 +23,7 @@ from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-version_number = 1.21
+version_number = 1.23
 
 def reset_data():
     #set globals
