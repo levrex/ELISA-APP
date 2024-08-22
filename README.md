@@ -3,7 +3,7 @@ A tool for processing ELISA Reader output, developed for the Rheumatology depart
 
 
 ## Installation Instructions
-Users can download anaconda navigator (https://www.anaconda.com/products/navigator), which also installs the Anaconda Prompt terminal. Within this terminal, you can navigate to the folder where you installed the ELISA package, for example:
+Users can download anaconda navigator (https://www.anaconda.com/products/navigator), which also installs the Anaconda Prompt terminal. You can find the terminal, by searching for it in the windows task bar. Within this terminal, you can navigate to the folder where you installed the ELISA package, for example:
 ```batch
 cd  C:\Users\[USERNAME]\Desktop\projects\ELISA-APP
 ```
