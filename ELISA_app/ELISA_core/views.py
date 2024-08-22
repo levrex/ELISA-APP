@@ -961,6 +961,8 @@ def Cut_off(request):
                 })
         elif cut_data == []:
             if elisa_type == '1':
+                print(elisa_type, len(totaal) == len(dictionary), len(totaal), len(dictionary))
+                print('value:', totaal[2][2][1], 'value2:', totaal[2][2][2], totaal[2][2][3])
                 for i, j in dictionary.items():
                     if HD == i:
                         for values in range(len(j)):
@@ -978,6 +980,8 @@ def Cut_off(request):
                                         if value <= mod_length:
                                             cut_data.append(j[values][value][0])
             elif elisa_type == '2':
+                print(elisa_type, len(totaal) == len(dictionary), len(totaal), len(dictionary))
+                print('value:', totaal[2][2][0])
                 for i, j in dictionary.items():
                     if HD == i:
                         for values in range(len(j)):
