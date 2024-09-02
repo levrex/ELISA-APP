@@ -23,7 +23,7 @@ from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-version_number = 1.23
+version_number = 1.25
 
 def reset_data():
     #set globals
@@ -776,7 +776,8 @@ def Visualize_data(request):
         return render(request, 'Visualize_data.html', {
             'dictionary': dictionary,
             'cut_off_type': cut_off_type,
-            'linear_part' : 'Points selected per plate for the linear part: %s' % (str(linear_part))
+            'linear_part' : 'Points selected per plate for the linear part: %s' % (str(linear_part)) * (points_dictionary!={}),
+            'hd_pre' : 'Plate with healthy donor data: %s' % (str(HD)) * (HD!='')
             
     })
     except: #todo should specify this
@@ -949,7 +950,7 @@ def Cut_off(request):
                     'std2': std2,
                     'check': check_cut_off,
                     'outlier_value': outlier_value,
-                    'cut_off_value': cut_off_value  * dilution_factor, 
+                    'cut_off_value': round(cut_off_value  * dilution_factor, 3), 
                 })
             elif request.POST.get('cut_off_submit'):
                 input3 = request.POST.get('input3')
@@ -965,7 +966,7 @@ def Cut_off(request):
                     'std2': std2,
                     'check': check_cut_off,
                     'outlier_value': outlier_value,
-                    'cut_off_value': cut_off_value * dilution_factor # Cut off times dilution factor
+                    'cut_off_value': round(cut_off_value  * dilution_factor, 3), # Cut off times dilution factor
                 })
         elif cut_data == []:
             if elisa_type == '1':
@@ -993,6 +994,12 @@ def Cut_off(request):
                                             mod_length = len(j[values])/2
                                             if value <= mod_length:
                                                 cut_data.append(j[values][value][0])
+                                    elif str(totaal[int(index_HD)][values][value]).lower()[:2] in ("em"): 
+                                        # If empty row -> continue to next row by breaking (so we ignore the non-modified HD for swarm plot/cut-off) 
+                                        # Warning : this presumes that modified and non-modified is seperated by empty column! 
+                                        # Remove if reasoning is incorrect!
+                                        break
+                                    
             elif elisa_type == '2':
                 index_HD = next((i for i, sublist in enumerate(totaal) if str(sublist[0][0]).lower() == HD), None)
                 for i, j in dictionary.items():
