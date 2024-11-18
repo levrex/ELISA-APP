@@ -40,6 +40,40 @@
 <p class="spacing_end">The values from rules {{rule}} are: {{rule_value}} and {{rule_value2}} <br></p>
 {% endif %}
 
+{# START PICKLE MAGIC #}
+<form method="POST">
+        {% csrf_token %}
+        <div class="input_text">
+            <p class="spacing_end"> <br> Session name: <input type="text" name="Session_name" class="input" value="">
+            <input type="submit" value="Download session" name="download_pickle" class="button"><br><br><br></p>
+        </div>
+    </form>
+
+{# END PICKLE MAGIC #}
+
+{% if check == 'pickle_download' %}
+        <p class="message_succes">Session was successfully downloaded.</p>
+    {% endif %}
+    {% if check == 'pickle_upload' %}
+        <p class="message_succes">Session was successfully uploaded.</p>
+    {% endif %}
+    {% if check == 'file' %}
+        <p class="message_fail">No files were selected, please try again.</p>
+    {% endif %}
+    {% if check == 'correct' %}
+        <p class="message_succes">Data was successfully uploaded.</p>
+    {% endif %}
+    {% if check == 'correct_emptied' %}
+        <p class="message_succes">Table in database was successfully emptied.</p>
+    {% endif %}
+    {% if check == 'extension' %}
+        <p class="message_fail">Wrong file(s) were submitted, please try again. (allowed file types are .txt and .xlsx)</p>
+    {% endif %}
+    {% if check == 'false' %}
+        <p class="message_fail">Input was not properly formatted, please try again.</p>
+    {% endif %}
+
+
 {% if elisa_type == '1' %}
 <table class="spacing">
     <thead>

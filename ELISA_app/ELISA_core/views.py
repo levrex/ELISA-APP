@@ -23,7 +23,7 @@ from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-version_number = 1.25
+version_number = 1.27
 
 def reset_data():
     #set globals
@@ -950,15 +950,16 @@ def Cut_off(request):
                     'std2': std2,
                     'check': check_cut_off,
                     'outlier_value': outlier_value,
-                    'cut_off_value': round(cut_off_value  * dilution_factor, 3), 
+                    'cut_off_value': round(cut_off_value * dilution_factor, 3), 
                 })
             elif request.POST.get('cut_off_submit'):
                 input3 = request.POST.get('input3')
                 input4 = request.POST.get('input4')
                 input5 = request.POST.get('input5')
-                cut_off_value = (float(input3) * mean2) + (float(input4) * std2)
-                cut_off_value = round(cut_off_value, 3) #TODO Flow for formula and cut-off
                 dilution_factor = float(input5)
+                cut_off_value = (float(input3) * mean2) + (float(input4) * std2)
+                cut_off_value = round(cut_off_value , 3) #TODO Flow for formula and cut-off
+                
                 return render(request, 'Cut_off.html', {
                     'mean': mean,
                     'std': std,
@@ -966,16 +967,13 @@ def Cut_off(request):
                     'std2': std2,
                     'check': check_cut_off,
                     'outlier_value': outlier_value,
-                    'cut_off_value': round(cut_off_value  * dilution_factor, 3), # Cut off times dilution factor
+                    'cut_off_value': round(cut_off_value * dilution_factor, 3), # Cut off times dilution factor
                 })
         elif cut_data == []:
             if elisa_type == '1':
                 # Get index of HD plate
                 
                 index_HD = next((i for i, sublist in enumerate(totaal) if str(sublist[0][0]).lower() == HD), None)
-                #print(index_HD)
-                #print(str(totaal[int(index_HD)][7][11][:2]).lower() in ("hd", "rl"))
-                #print(totaal[2][2][7][:2].lower())
                 
                 for i, j in dictionary.items():
                     if HD == i:
@@ -983,22 +981,25 @@ def Cut_off(request):
                             count_the_mod = 0
                             for value in range(len(j[values])):
                                 if type(j[values][value][0]) != str:
-                                    if str(totaal[int(index_HD)][values][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                    #if index_HD != 7:
+                                    #print(i, index_HD, values, value)
+                                    #print(totaal[index_HD][values][value])
+                                    if str(totaal[index_HD][values][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
                                         if int(row_standard) == 0:
                                             if value != int(column_standard[0]):
                                                 if value != int(column_standard[1]):
-                                                    if count_the_mod < 5:
+                                                    if value < 8: # Assume 3 to 7 is modified & 8 to 12 is non-modified 
                                                         cut_data.append(j[values][value][0])
                                                         count_the_mod += 1
                                         elif int(row_standard) != values:
                                             mod_length = len(j[values])/2
                                             if value <= mod_length:
                                                 cut_data.append(j[values][value][0])
-                                    elif str(totaal[int(index_HD)][values][value]).lower()[:2] in ("em"): 
+                                    else : #str(totaal[int(index_HD)][values][value]).lower()[:2] in ("em"): 
                                         # If empty row -> continue to next row by breaking (so we ignore the non-modified HD for swarm plot/cut-off) 
                                         # Warning : this presumes that modified and non-modified is seperated by empty column! 
                                         # Remove if reasoning is incorrect!
-                                        break
+                                        continue
                                     
             elif elisa_type == '2':
                 index_HD = next((i for i, sublist in enumerate(totaal) if str(sublist[0][0]).lower() == HD), None)
@@ -1027,7 +1028,7 @@ def Cut_off(request):
                 'std': std,
                 'check': check_cut_off,
                 'outlier_value': outlier_value,
-                'cut_off_value': cut_off_value,
+                'cut_off_value': round(cut_off_value * dilution_factor, 3), 
                 'dilution_factor': dilution_factor,
             })
         return render(request, 'Cut_off.html', {
@@ -1037,7 +1038,7 @@ def Cut_off(request):
             'std2': std2,
             'check': check_cut_off,
             'outlier_value': outlier_value,
-            'cut_off_value': cut_off_value,
+            'cut_off_value': round(cut_off_value * dilution_factor, 3), 
             'dilution_factor': dilution_factor,
         })
     except:
@@ -1331,6 +1332,8 @@ def End_results(request):
           is given an 1, if they are not met then the list gets an 0. After the list is filled and sorted
           the list is given to the render.
     """
+    
+    # CHECK if everything goes well with nonmod in case of general ELISA!!
     try:
         global final_list
         global cut_off_value_au
@@ -1339,7 +1342,17 @@ def End_results(request):
         global rule
         OD_multiplier = 'None'
         OD_multiplier2 = 'nothing'
+        
         if request.method == 'POST':
+            #start pickle magic
+            if request.POST.get('download_pickle'):
+                session_writeout("Manual Session")
+                filename = request.POST.get('Session_name')
+                response = HttpResponse(open("Manual Session.ELISA_App", 'rb').read())
+                response['Content-Type'] = 'text/plain'
+                response['Content-Disposition'] = f'attachment; filename={filename}.ELISA_App'
+                return response
+            
             if request.POST.get('download'):
                 filename = request.POST.get('File_name')
                 target = report_writeout()
@@ -1461,19 +1474,20 @@ def End_results(request):
                                                         OD_multiplier = request.POST.get('OD_multiplier')
                                                         OD_add = request.POST.get('OD_higher')
                                                         OD_multiplier2 = request.POST.get('reference')
-                                                        if OD_add != '':
+                                                        print(OD_add)
+                                                        if OD_add != None: # default is none instead of ''
                                                             rule = '2 and 3'
                                                             if (values[counter2][2]) - (
                                                             values[counter2 + non_mod_count][2]) >= int(OD_add):
                                                                 if (round(elements[1])) >= int(OD_multiplier2):
                                                                     final_dictionary[sampleID] = end_variable
-                                                        elif OD_multiplier != '':
+                                                        elif OD_multiplier != None: # default is none instead of ''
                                                             rule = '1 and 3'
                                                             if (values[counter2][2]) / (
                                                             values[counter2 + non_mod_count][2]) >= int(OD_multiplier):
                                                                 if (round(elements[1])) >= int(OD_multiplier2):
                                                                     final_dictionary[sampleID] = end_variable
-                                                        elif OD_multiplier2 != '':
+                                                        elif OD_multiplier2 != None: # default is none instead of ''
                                                             if (round(elements[1])) >= int(OD_multiplier2):
                                                                 final_dictionary[sampleID] = end_variable
                                         if sampleID not in final_dictionary:
