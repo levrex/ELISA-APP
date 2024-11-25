@@ -9,18 +9,18 @@
     {% if elisa_type == '1' %}
     <p class="spacing_end">
         Rule 1: How many times higher should the modified peptides (OD) be compared to the non-modified peptides (OD):
-        <input type="number" name="OD_multiplier" class="input">
+        <input type="number" name="OD_multiplier" step="any" class="input" value="{{ rule_value4 }}">
         <input type="submit" value="Update table" name="update_table_M" class="button">
     </p>
     <p class="spacing_end">
         Rule 2: How much higher should the modified peptides (OD) be compared to the non-modified peptides (OD):
-        <input type="number" name="OD_higher" class="input">
+        <input type="number" name="OD_higher" step="any" class="input" value="{{ rule_value3 }}">
         <input type="submit" value="Update table" name="update_table_H" class="button">
     </p>
     {% endif %}
     <p class="spacing_end">
         Rule 3: Above which reference value should the sample be:
-        <input type="number" name="reference" class="input">
+        <input type="number" name="reference" step="any" value="{{ rule_value2 }}" class="input">
         {{unit}}
         <input type="submit" value="Update table" name="update_table_S" class="button">
     </p>

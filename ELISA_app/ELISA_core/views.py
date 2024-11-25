@@ -23,7 +23,7 @@ from pathlib import Path
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-version_number = 1.27
+version_number = 1.31
 
 def reset_data():
     #set globals
@@ -44,12 +44,21 @@ def reset_data():
     global std2; std2 = 0
     global check_cut_off; check_cut_off = 'false'
     global cut_data; cut_data = []
+    global input1; input1 = 1
+    global input2; input2 = 4
+    global input3; input3 = 1
+    global input4; input4 = 2
+    global input5; input5 = 50
     global outlier_value; outlier_value = 0.0
     global cut_off_value; cut_off_value = 0.0
     global dilution_factor; dilution_factor = 0.0
     global end_result; end_result = {}
     global lower; lower = 0.0
     global upper; upper = 0.0
+    global OD_add; OD_add = None
+    global OD_multiplier; OD_multiplier = 'None'
+    global OD_multiplier2; OD_multiplier2 = 'nothing'
+    global rule_value; rule_value = None
     global intermediate_dictionary; intermediate_dictionary = {}
     global params_dictionary; params_dictionary = {}
     global final_dictionary; final_dictionary = {}
@@ -782,8 +791,9 @@ def Visualize_data(request):
     })
     except: #todo should specify this
          return render(request, 'Error.html', {
-             'error': 'An error occurred, please be sure to load in the plate layout file and choose a ST value on the '
-                      'Plate Layout page.',
+             'error': 'An error occured. Please first make sure that the format of all files corresponds to the format' +
+             ' specified in the ELISA App Manual, and secondly that the rest of the manual is followed correctly. If the'+
+             ' error persists, ask someone (e.g. Karin) for help'
          })
 
 
@@ -908,6 +918,7 @@ def Cut_off(request):
          calculated.
     """
     try:
+        global input1, input2, input3, input4, input5
         global mean
         global std
         global mean2
@@ -926,8 +937,11 @@ def Cut_off(request):
             })
         if request.method == 'POST':
             if request.POST.get('outlier_submit'):
-                input1 = request.POST.get('input1')
-                input2 = request.POST.get('input2')
+                print('EXTRACT:', request.POST.get('input1'))
+                if request.POST.get('input1') != '' and request.POST.get('input1') != None:
+                    input1 = request.POST.get('input1')
+                if request.POST.get('input2') != '' and request.POST.get('input2') != None:
+                    input2 = request.POST.get('input2')
                 outlier_value = (float(input1) * mean) + (float(input2) * std)
                 outlier_value = round(outlier_value, 3) #TODO Flow for formula and outlier
                 new_y_list = []
@@ -944,6 +958,11 @@ def Cut_off(request):
                 plt.close()
                 check_cut_off = 'true'
                 return render(request, 'Cut_off.html', {
+                    'input1': input1,
+                    'input2': input2,
+                    'input3': input3,
+                    'input4': input4,
+                    'input5': input5,
                     'mean': mean,
                     'std': std,
                     'mean2': mean2,
@@ -953,14 +972,25 @@ def Cut_off(request):
                     'cut_off_value': round(cut_off_value * dilution_factor, 3), 
                 })
             elif request.POST.get('cut_off_submit'):
-                input3 = request.POST.get('input3')
-                input4 = request.POST.get('input4')
-                input5 = request.POST.get('input5')
+                if request.POST.get('input3') != '' and request.POST.get('input3') != None:
+                    input3 = request.POST.get('input3')
+                if request.POST.get('input4') != '' and request.POST.get('input4') != None:
+                    input4 = request.POST.get('input4')
+                if request.POST.get('input5') != '' and request.POST.get('input5') != None:
+                    input5 = request.POST.get('input5')
+                #input3 = request.POST.get('input3')
+                #input4 = request.POST.get('input4')
+                #input5 = request.POST.get('input5')
                 dilution_factor = float(input5)
                 cut_off_value = (float(input3) * mean2) + (float(input4) * std2)
                 cut_off_value = round(cut_off_value , 3) #TODO Flow for formula and cut-off
                 
                 return render(request, 'Cut_off.html', {
+                    'input1': input1,
+                    'input2': input2,
+                    'input3': input3,
+                    'input4': input4,
+                    'input5': input5,
                     'mean': mean,
                     'std': std,
                     'mean2': mean2,
@@ -981,10 +1011,12 @@ def Cut_off(request):
                             count_the_mod = 0
                             for value in range(len(j[values])):
                                 if type(j[values][value][0]) != str:
-                                    #if index_HD != 7:
-                                    #print(i, index_HD, values, value)
-                                    #print(totaal[index_HD][values][value])
-                                    if str(totaal[index_HD][values][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                    #print('values', values)
+                                    print('totaal', totaal[index_HD][values+1])
+                                    print('values', j[values][value])
+                                    #print('Indexing similar?:', len(totaal[index_HD]), len(j))# +1
+                                    if str(totaal[index_HD][values+1][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                        
                                         if int(row_standard) == 0:
                                             if value != int(column_standard[0]):
                                                 if value != int(column_standard[1]):
@@ -1024,6 +1056,11 @@ def Cut_off(request):
             plt.savefig(get_mediapath('swarmplot.png'))
             plt.close()
             return render(request, 'Cut_off.html', {
+                'input1': input1,
+                'input2': input2,
+                'input3': input3,
+                'input4': input4,
+                'input5': input5,
                 'mean': mean,
                 'std': std,
                 'check': check_cut_off,
@@ -1032,6 +1069,11 @@ def Cut_off(request):
                 'dilution_factor': dilution_factor,
             })
         return render(request, 'Cut_off.html', {
+            'input1': input1,
+            'input2': input2,
+            'input3': input3,
+            'input4': input4,
+            'input5': input5,
             'mean': mean,
             'std': std,
             'mean2': mean2,
@@ -1041,7 +1083,7 @@ def Cut_off(request):
             'cut_off_value': round(cut_off_value * dilution_factor, 3), 
             'dilution_factor': dilution_factor,
         })
-    except:
+    except ZeroDivisionError:
         return render(request, 'Error.html', {
             'error': 'An error occurred, please be sure to select the plate with the healthy donor data on the '
                      'Visualize data page.'
@@ -1062,8 +1104,13 @@ def formula2(y, A, B, C, D, E):
     Function:
         - This function returns the x-value (concentration) of a given y-value (OD).
     """
+    #y = max(0.01, y) # sometimes y is a small near-zero negative value-> which should not be possible so set it to close to zero
+    #print(C, A, D, y, E, B)
+    #print(((A-D)/(-D+float(y))))
+    #try: #
     return C*(np.power((np.power(((A-D)/(-D+float(y))), (1/E))-1), (1/B)))
-
+    #except :
+    #    return np.nan
 
 def Intermediate_result(request):
     """
@@ -1340,8 +1387,12 @@ def End_results(request):
         global final_dictionary
         global end_result
         global rule
-        OD_multiplier = 'None'
-        OD_multiplier2 = 'nothing'
+        global OD_multiplier2
+        global OD_multiplier
+        global OD_add
+        global rule_value
+        #OD_multiplier = 'None'
+        #OD_multiplier2 = 'nothing'
         
         if request.method == 'POST':
             #start pickle magic
@@ -1363,7 +1414,9 @@ def End_results(request):
             if request.POST.get('update_table_M') or request.POST.get('update_table_H') or\
                     request.POST.get('update_table_S') or request.POST.get('update_table_No'):
                 final_dictionary = {}
-                OD_multiplier = request.POST.get('OD_multiplier')
+                
+                if request.POST.get('OD_multiplier') != '' and request.POST.get('OD_multiplier') != None:
+                    OD_multiplier = request.POST.get('OD_multiplier')
                 first_value = list(end_result.values())[0]
                 if len(first_value[0]) == 2:
                     for keys, values in dictionary.items():
@@ -1458,37 +1511,55 @@ def End_results(request):
                                                                         round(elements[1]), values[counter2][2]]
                                                     if request.POST.get('update_table_M'):
                                                         rule = 1
-                                                        OD_multiplier = request.POST.get('OD_multiplier')
-                                                        if (values[counter2][2])/(values[counter2 + non_mod_count][2]) >= int(OD_multiplier):
+                                                        OD_add = None # replaces rule 2 & prev
+                                                        OD_multiplier2 = 'nothing'
+                                                        if request.POST.get('OD_multiplier') != '' and request.POST.get('OD_multiplier') != None:
+                                                            OD_multiplier = request.POST.get('OD_multiplier')
+                                                            rule_value = OD_multiplier
+                                                        if (values[counter2][2])/(values[counter2 + non_mod_count][2]) >= float(OD_multiplier):
                                                             final_dictionary[sampleID] = end_variable
                                                     elif request.POST.get('update_table_H'):
                                                         rule = 2
-                                                        OD_add = request.POST.get('OD_higher')
-                                                        if (values[counter2][2]) - (values[counter2 + non_mod_count][2]) >= int(OD_add):
+                                                        OD_multiplier = 'None' # replaces rule 1 & prev
+                                                        OD_multiplier2 = 'nothing'
+                                                        if request.POST.get('OD_higher') != '' and request.POST.get('OD_higher') != None:
+                                                            OD_add = request.POST.get('OD_higher')
+                                                            rule_value = OD_add
+                                                        if (values[counter2][2]) - (values[counter2 + non_mod_count][2]) >= float(OD_add):
                                                             final_dictionary[sampleID] = end_variable
+                                                            
                                                     elif request.POST.get('update_table_No'):
                                                         rule = 4
+                                                        # reset previous rules
+                                                        OD_add = None
+                                                        OD_multiplier = 'None'
+                                                        OD_multiplier2 = 'nothing'
+                                                        rule_value = None
                                                         final_dictionary[sampleID] = end_variable
                                                     elif request.POST.get('update_table_S'):
                                                         rule = 3
-                                                        OD_multiplier = request.POST.get('OD_multiplier')
-                                                        OD_add = request.POST.get('OD_higher')
-                                                        OD_multiplier2 = request.POST.get('reference')
-                                                        print(OD_add)
-                                                        if OD_add != None: # default is none instead of ''
+                                                        if request.POST.get('OD_multiplier') != '' and request.POST.get('OD_multiplier') != None:
+                                                            OD_multiplier = request.POST.get('OD_multiplier')
+                                                        if request.POST.get('OD_higher') != '' and request.POST.get('OD_higher') != None:
+                                                            OD_add = request.POST.get('OD_higher')
+                                                        if request.POST.get('reference') != '' and request.POST.get('reference') != None:
+                                                            OD_multiplier2 = request.POST.get('reference')
+                                                        if OD_add != None and OD_add != 'None' and OD_add != '': # default is none instead of ''
                                                             rule = '2 and 3'
                                                             if (values[counter2][2]) - (
-                                                            values[counter2 + non_mod_count][2]) >= int(OD_add):
-                                                                if (round(elements[1])) >= int(OD_multiplier2):
+                                                            values[counter2 + non_mod_count][2]) >= float(OD_add):
+                                                                if (round(elements[1])) >= float(OD_multiplier2):
                                                                     final_dictionary[sampleID] = end_variable
-                                                        elif OD_multiplier != None: # default is none instead of ''
+                                                                    rule_value = OD_add
+                                                        elif OD_multiplier != None and OD_multiplier != 'None' and OD_multiplier != '': # default is none instead of ''
                                                             rule = '1 and 3'
                                                             if (values[counter2][2]) / (
-                                                            values[counter2 + non_mod_count][2]) >= int(OD_multiplier):
-                                                                if (round(elements[1])) >= int(OD_multiplier2):
+                                                            values[counter2 + non_mod_count][2]) >= float(OD_multiplier):
+                                                                if (round(elements[1])) >= float(OD_multiplier2):
                                                                     final_dictionary[sampleID] = end_variable
-                                                        elif OD_multiplier2 != None: # default is none instead of ''
-                                                            if (round(elements[1])) >= int(OD_multiplier2):
+                                                                    rule_value = OD_multiplier
+                                                        elif OD_multiplier2 != None and OD_multiplier2 != 'None' and OD_multiplier2 != '' and OD_multiplier2 != 'nothing': # default is none instead of ''
+                                                            if (round(elements[1])) >= float(OD_multiplier2):
                                                                 final_dictionary[sampleID] = end_variable
                                         if sampleID not in final_dictionary:
                                             if float(elements[1]) < float(lower):
@@ -1535,8 +1606,10 @@ def End_results(request):
             'lower': lower,
             'cut_off_value': round(cut_off_value_au),
             'rule': rule,
-            'rule_value' : OD_multiplier,
+            'rule_value' : rule_value,
             'rule_value2' : OD_multiplier2,
+            'rule_value3' : OD_add,
+            'rule_value4' : OD_multiplier,
             'unit': unit_name,
             'elisa_type': elisa_type,
             'cut_off_type': cut_off_type,
