@@ -1011,11 +1011,7 @@ def Cut_off(request):
                             count_the_mod = 0
                             for value in range(len(j[values])):
                                 if type(j[values][value][0]) != str:
-                                    #print('values', values)
-                                    print('totaal', totaal[index_HD][values+1])
-                                    print('values', j[values][value])
-                                    #print('Indexing similar?:', len(totaal[index_HD]), len(j))# +1
-                                    if str(totaal[index_HD][values+1][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                    if str(totaal[index_HD][values+1][value]).lower()[:2] in ("hd"): # check if it is healthy donor: not Empty, Ref or study
                                         
                                         if int(row_standard) == 0:
                                             if value != int(column_standard[0]):
@@ -1027,10 +1023,7 @@ def Cut_off(request):
                                             mod_length = len(j[values])/2
                                             if value <= mod_length:
                                                 cut_data.append(j[values][value][0])
-                                    else : #str(totaal[int(index_HD)][values][value]).lower()[:2] in ("em"): 
-                                        # If empty row -> continue to next row by breaking (so we ignore the non-modified HD for swarm plot/cut-off) 
-                                        # Warning : this presumes that modified and non-modified is seperated by empty column! 
-                                        # Remove if reasoning is incorrect!
+                                    else : 
                                         continue
                                     
             elif elisa_type == '2':
@@ -1040,7 +1033,7 @@ def Cut_off(request):
                         for values in range(len(j)):
                             for value in range(len(j[values])):
                                 if type(j[values][value][0]) != str:
-                                    if str(totaal[int(index_HD)][values][value]).lower()[:2] in ("hd", "rl"): # check if it is healthy donor: not Empty, Ref or study
+                                    if str(totaal[int(index_HD)][values][value]).lower()[:2] in ("hd"): # check if it is healthy donor: not Empty, Ref or study
                                         if int(row_standard) == 0:
                                             if value != int(column_standard[0]):
                                                 if value != int(column_standard[1]):
@@ -1083,7 +1076,7 @@ def Cut_off(request):
             'cut_off_value': round(cut_off_value * dilution_factor, 3), 
             'dilution_factor': dilution_factor,
         })
-    except ZeroDivisionError:
+    except :
         return render(request, 'Error.html', {
             'error': 'An error occurred, please be sure to select the plate with the healthy donor data on the '
                      'Visualize data page.'
@@ -1104,13 +1097,7 @@ def formula2(y, A, B, C, D, E):
     Function:
         - This function returns the x-value (concentration) of a given y-value (OD).
     """
-    #y = max(0.01, y) # sometimes y is a small near-zero negative value-> which should not be possible so set it to close to zero
-    #print(C, A, D, y, E, B)
-    #print(((A-D)/(-D+float(y))))
-    #try: #
     return C*(np.power((np.power(((A-D)/(-D+float(y))), (1/E))-1), (1/B)))
-    #except :
-    #    return np.nan
 
 def Intermediate_result(request):
     """
